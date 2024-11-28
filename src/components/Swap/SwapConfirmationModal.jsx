@@ -7,7 +7,7 @@ const SwapConfirmationModal = ({
   onConfirm,
   details: { fromToken, toToken, fromAmount, toAmount, estimatedFees, slippage },
 }) => {
-  if (!isOpen) return null; // Do not render the modal if it is not open
+  if (!isOpen) return null; 
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

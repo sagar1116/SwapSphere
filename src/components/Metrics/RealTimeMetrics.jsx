@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { connectWebSocket, closeWebSocket } from "../../utils/api";
 
 const RealTimeMetrics = () => {
   const [metrics, setMetrics] = useState({
@@ -8,31 +9,26 @@ const RealTimeMetrics = () => {
     percentageChange: 0,
   });
 
-  const fetchRealTimeMetrics = async () => {
-    try {
-      // Mock API response for metrics
-      const mockResponse = {
-        slippage: Math.random() * 1, // Mock slippage percentage
-        priceImpact: Math.random() * 2, // Mock price impact percentage
-        fees: Math.random() * 5, // Mock fees in USD
-        percentageChange: (Math.random() - 0.5) * 2, // Mock percentage change
-      };
-
-      // Simulate API response delay
-      setTimeout(() => {
-        setMetrics(mockResponse);
-      }, 1000);
-    } catch (error) {
-      console.error("Error fetching metrics:", error);
-    }
-  };
-
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchRealTimeMetrics();
-    }, 2000); // Poll every 2 seconds
+    const handleMetricsUpdate = (data) => {
+      setMetrics({
+        slippage: data.slippage || 0,
+        priceImpact: data.priceImpact || 0,
+        fees: data.fees || 0,
+        percentageChange: data.percentageChange || 0,
+      });
+    };
 
-    return () => clearInterval(interval); // Cleanup interval on unmount
+    const ws = connectWebSocket(
+      "wss://your-websocket-url/metrics", // Replace with WebSocket URL
+      handleMetricsUpdate,
+      (error) => console.error("Metrics WebSocket Error:", error),
+      () => console.log("Metrics WebSocket closed.")
+    );
+
+    return () => {
+      closeWebSocket(); // Cleanup on component unmount
+    };
   }, []);
 
   return (
